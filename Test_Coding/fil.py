@@ -1,14 +1,16 @@
+from cmu_graphics import *
+
 app.gravity = 0.6
 app.friction = 1
 
 void = Rect(-10*10**4, 360, 10*10**9, 440, fill='black')
 player = Group(Rect(150, 320, 30, 40, fill='red'))
-player.horizontalSpeed = 15
+player.horizontalSpeed = 2
+player.maxHorizontal = 16
 player.dx = 0
 player.jumpHeight = 10
 player.jumps = 1
 player.dy = 0
-#fixa så att player har dx istället för bara speed
 
 app.stepsPerSecond = 30
 
@@ -31,7 +33,7 @@ def createLevelOne():
         else:
             y = randrange(150, 200)
         platforms.add(Rect(250+n*150, y, 100, 20, fill='grey'))
-    
+
     for n in range(0, 10+1):
         spike = Group()
         x = 300 +400*n
@@ -62,7 +64,7 @@ def onPlatformCheck():
         elif player.hitsShape(platform) and player.left > platform.centerX:
             player.left = platform.right
             player.dx = 0
-                
+
 def gameOverCheck():
     for spike in spikes:
         if player.hitsShape(spike):
@@ -90,11 +92,18 @@ def onKeyHold(keys):
         player.dx += 0
     elif ('d' in keys) or ('D' in keys) or ('right' in keys):
         if leftPlatformCheck() == False:
-            player.dx = -player.horizontalSpeed
-        
+            if player.dx > -player.maxHorizontal:
+                player.dx -= player.horizontalSpeed
+            elif player.dx < -player.maxHorizontal:
+                player.dx = -player.maxHorizontal
+            
     elif ('a' in keys) or ('A' in keys) or ('left' in keys):
         if rightPlatformCheck() == False:
-            player.dx = player.horizontalSpeed
+            if player.dx < player.maxHorizontal:
+                player.dx += player.horizontalSpeed
+            elif player.dx > player.maxHorizontal:
+                player.dx = player.maxHorizontal
+
 
 def onKeyPress(key):
     if 'space' == key and player.jumps > 0:
@@ -105,6 +114,7 @@ def onStep():
     player.centerX = 150
     player.centerY += player.dy
     map.centerX += player.dx
+    
     if player.dx > 0:
         player.dx -= app.friction
     if player.dx < 0:
@@ -135,3 +145,5 @@ def onStep():
                 n.centerY += randrange(-10, 10)
         Label('GAME OVER', 200, 200, fill='red', size=60)
         app.stop()
+
+cmu_graphics.run()
