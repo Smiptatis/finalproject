@@ -16,7 +16,8 @@ player.jumpHeight = 10
 player.jumpHeight2 = 5
 player.jumps = 2
 player.dy = 0
-player.dashLength = 20
+player.dashLength = 30
+player.dash = 1
 
 app.stepsPerSecond = 20
 
@@ -24,7 +25,8 @@ map = Group()
 floor = Rect(-100, 360, 4800, 40, fill=gradient('saddleBrown',  'lime', start='bottom'))
 #sign = Polygon(-100,360,)
 platforms = Group()
-map.add(floor, platforms)
+walls = Group()
+map.add(floor, platforms, walls)
 secret = Rect(-700, 100, 40, 40, fill='pink')
 goal = Group(Rect(4750, 350, 50, 10, fill='lightGrey'), Polygon(4750, 350, 4770, 320, 4780, 320, 4800, 350, fill=gradient('blue', 'lightBlue', 'lightblue', start='bottom')),)
 goal.star = Star(4775, 320, 20, 5, fill='yellow')
@@ -44,7 +46,7 @@ app.rickastleyurl = 'https://media.discordapp.net/attachments/750800636928458843
 
     
 #execfile('levels/level1.py')
-createLevelOne(platforms, spikes, goal)
+createLevelOne(platforms, spikes, goal, walls)
 app.resetLeft = map.left
 
 def playerOnPlatform():
@@ -62,6 +64,7 @@ def onPlatformCheck():
             player.bottom = platform.top
             player.dy = 0
             player.jumps = 2
+            player.dash = 1
         elif player.hitsShape(platform) and player.top > platform.top:
             player.top = platform.bottom
             player.dy = 0
@@ -71,6 +74,19 @@ def onPlatformCheck():
         elif player.hitsShape(platform) and player.left > platform.centerX:
             player.left = platform.right
             player.dx = 0
+
+def onWallCheck():
+    for wall in walls:
+        if player.hitsShape(wall):
+            if player.right > wall.left:
+                player.right = wall.left
+                player.dx = 0
+                player.jumps = 1
+            elif player.left < wall.right:
+                player.left = wall.right
+                player.dx = 0
+                player.jumps = 1
+                
 
 def gameOverCheck():
     for spike in spikes:
@@ -95,23 +111,38 @@ def rightPlatformCheck():
             return True
     return False
 
+def leftWallCheck():
+    for wall in walls:
+        if player.hitsShape(wall) and player.right > wall.left:
+            return True
+    return False
+def rightWallCheck():
+    for wall in walls:
+        if player.hitsShape(wall) and player.left < wall.right:
+            return True
+    return False
+
 
 def onKeyHold(keys):
     if (('d' in keys) or ('D' in keys) or ('right' in keys)) and (('a' in keys) or ('A' in keys) or ('left' in keys)):
         player.dx += 0
     elif ('d' in keys) or ('D' in keys) or ('right' in keys):
-        if leftPlatformCheck() == False:
+        if leftPlatformCheck() == False and leftWallCheck() == False:
             if player.dx > -player.maxHorizontal:
                 player.dx -= player.horizontalSpeed
             elif player.dx < -player.maxHorizontal:
                 player.dx = -player.maxHorizontal
+        else:
+            player.dx = 0
             
     elif ('a' in keys) or ('A' in keys) or ('left' in keys):
-        if rightPlatformCheck() == False:
+        if rightPlatformCheck() == False and rightWallCheck() == False:
             if player.dx < player.maxHorizontal:
                 player.dx += player.horizontalSpeed
             elif player.dx > player.maxHorizontal:
                 player.dx = player.maxHorizontal
+        else:
+            player.dx = 0
 
 def onMouseMove(mouseX, mouseY):
     app.mouseX = mouseX
@@ -127,14 +158,7 @@ def onKeyPress(key):
             else:
                 player.dy -= player.jumpHeight2
         player.jumps -= 1
-    if 'q' == key:
-        '''
-        if player.dx > 0:
-            player.dx += 20
-        if player.dx < 0:
-            player.dx -= 20
-        '''
-        
+    if 'q' == key and player.dash > 0:
         angle = angleTo(player.centerX, player.centerY, app.mouseX, app.mouseY)
         x, y = getPointInDir(player.centerX, player.centerY, angle, player.dashLength)
         xchange = int(distance(player.centerX, 0, x, 0))
@@ -147,6 +171,7 @@ def onKeyPress(key):
             player.dy -= ychange/2
         if player.centerY < y:
             player.dy += ychange/2
+        player.dash -= 1
         
         
 
@@ -166,8 +191,10 @@ def onStep():
         player.dy = 0
         player.bottom = floor.top
         player.jumps = 2
+        player.dash = 1
     
     onPlatformCheck()
+    onWallCheck()
     
     if playerOnPlatform() == False:
         player.dy += app.gravity
@@ -189,7 +216,7 @@ def onStep():
         for n in range(6):
             for i in range(8):
                 player.add(Rect(x-15+n, y-20+i, 5, 5, fill='red'))
-        for i in range(1):
+        for i in range(25):
             for n in player:
                 n.centerX += randrange(-10, 10)
                 n.centerY += randrange(-10, 10)

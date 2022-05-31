@@ -10,7 +10,7 @@ def createSpike(x, y, angle, points):
     spike.rotateAngle = angle
     return spike
 
-def createLevelOne(platforms, spikes, goal):
+def createLevelOne(platforms, spikes, goal, walls):
     #PLATFORM 1 250 PLATFORM LAST 4450 highest y platform from ground == 255
     platforms.add(
     Rect(-200, 255, 300, 20, fill='grey'), 
