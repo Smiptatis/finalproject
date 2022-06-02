@@ -10,7 +10,10 @@ app.started = False
 
 
 void = Rect(-10*10**4, 360, 10*10**9, 440, fill='black')
-player = Group(Rect(150, 320, 30, 40, fill='red'))
+playerList = ['images/rock1.png', 'images/rock2.png', 'images/rock3.png', 'images/rock4.png']
+player = Group(Image(playerList[0], 150, 320))
+player.image = 1
+player.changeTimer = 0
 player.horizontalSpeed = 2
 player.maxHorizontal = 16
 player.dx = 0
@@ -24,7 +27,7 @@ player.dash = 1
 app.stepsPerSecond = 20
 
 map = Group()
-floor = Rect(-100, 360, 4800, 40, fill=gradient('saddleBrown',  'lime', start='bottom'))
+floor = Image('images/floor.png', -100, 360)
 #sign = Polygon(-100,360,)
 platforms = Group()
 walls = Group()
@@ -36,7 +39,9 @@ goal.add(goal.star)
 gobblers = Group()
 gobblers.speed = 5
 map.add(secret, goal, gobblers)
-gameOverLabel = Label('GAME OVER', 200, 200, fill='red', size=60, visible=False)
+gameOverLabel = Image('images/endScreen.png', 0, 0, visible=False)
+
+secretEnding = Group()
 
 spikes = Group()
 
@@ -44,14 +49,17 @@ hurtfulObjects = Group(spikes)
 
 map.add(spikes)
 
-app.rickastleyurl = 'https://media.discordapp.net/attachments/750800636928458843/948274243785875529/Lukasgif.gif'
+app.rickastleyurl = 'images/lukasgif.png'
 
     
 #execfile('levels/level1.py')
 createLevelOne(platforms, spikes, goal, walls, gobblers)
 app.resetLeft = map.left
 
-background = Image('images/gamebackground.png', map.left-2000, 0)
+background = Group() 
+background.add(Image('images/gamebackground.png', map.left-2000, 0))
+background.add(Image('images/gamebackground.png', background.right, 0))
+background.add(Image('images/gamebackground.png', background.right, 0))
 map.add(background)
 
 background.toBack()
@@ -113,7 +121,7 @@ def gameOverCheck():
     return False
 
 def win():
-    Label('Wow you did it!!!', 200, 200, fill='Pink', size=40)
+    Image('images/winner.png', 0, 0)
     app.stop()
 
 def leftPlatformCheck():
@@ -147,6 +155,20 @@ def onKeyHold(keys):
             if leftPlatformCheck() == False and leftWallCheck() == False:
                 if player.dx > -player.maxHorizontal:
                     player.dx -= player.horizontalSpeed
+                    player.changeTimer += 1
+                    if player.changeTimer%2 == 0:
+                        if player.image == 1:
+                            x = player.left
+                            y = player.top
+                            player.clear()
+                            player.add(Image(playerList[2], x, y))
+                            player.image = 2
+                        else:
+                            x = player.left
+                            y = player.top
+                            player.clear()
+                            player.add(Image(playerList[3], x, y))
+                            player.image = 1
                 elif player.dx < -player.maxHorizontal:
                     player.dx = -player.maxHorizontal
             else:
@@ -156,6 +178,20 @@ def onKeyHold(keys):
             if rightPlatformCheck() == False and rightWallCheck() == False:
                 if player.dx < player.maxHorizontal:
                     player.dx += player.horizontalSpeed
+                    player.changeTimer += 1
+                    if player.changeTimer%2 == 0:
+                        if player.image == 1:
+                            x = player.left
+                            y = player.top
+                            player.clear()
+                            player.add(Image(playerList[1], x, y))
+                            player.image = 2
+                        else:
+                            x = player.left
+                            y = player.top
+                            player.clear()
+                            player.add(Image(playerList[0], x, y))
+                            player.image = 1
                 elif player.dx > player.maxHorizontal:
                     player.dx = player.maxHorizontal
             else:
@@ -168,6 +204,9 @@ felixList = ['images/Felle1.png', 'images/Felle2.png', 'images/Felle3.png']
 #textBox = Group(Rect(0, 300, 322, 100, ), Polygon(322, 300, 322, 400, 400, 400), Polygon(0, 300, 400, 300, 375, 325, 0, 325, fill='darkBlue'), Image(choice(toreList), 0, 400-222), Polygon(0, 300, 78, 300, 0, 400, fill='white'))
 menu = Group(Image('images/background.png', 0, 0), Label('Socky Adventure', 200, 50, size=40, font='cinzel', fill=gradient('white', 'white', 'red', 'blue', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'red', 'red', 'red',  start='left')), Label('Against Bonke', 200, 90, size=40, font='cinzel', fill=gradient('white', 'white', 'red', 'blue', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'red', 'red', 'red',  start='left')))
 textBox = Group(Polygon(0, 400, 78, 300, 322, 300, 400, 400), Polygon(78, 300, 322, 300, 337.5, 320, 62.5, 320, fill='darkBlue'), Label('Tore and Felix', 200, 310, size=20, fill='white'), Image(choice(toreList), 0, 400-120), Image(choice(felixList), 322, 400-120))
+textBox.tore = Group(Image(choice(toreList), 0, 400-120))
+textBox.felix = Group(Image(choice(felixList), 322, 400-120))
+textBox.add(textBox.tore, textBox.felix)
 textBox.text1 = Group(Label('Welcome to (LOOK UP!!!)', 200, 330, fill='white'), Label('wasd or arrow keys to move', 200, 340, fill='white'), Label('space to jump and double jump', 200, 350, fill='white'), Label('q to dash towards the mouse.', 200, 360, fill='white'), Label('try not to die will you?', 200, 370, fill='white'), Label('Press the red scary button to start!!!!', 200, 380, fill='white'))
 
 startButton = Group(Circle(200, 200, 50, fill='black', border=gradient('darkGrey', 'grey', 'lightGrey', 'black'), borderWidth=10), Circle(200, 200, 38, fill=gradient('red', 'darkRed')))
@@ -178,6 +217,12 @@ def onMousePress(mouseX, mouseY):
     if startButton.hits(mouseX, mouseY):
         app.started = True
         menu.clear()
+    if textBox.tore.hits(mouseX, mouseY):
+        textBox.tore.clear()
+        textBox.tore.add(Image(choice(toreList), 0, 400-120))
+    if textBox.felix.hits(mouseX, mouseY):
+        textBox.felix.clear()
+        textBox.felix.add(Image(choice(felixList), 322, 400-120))
 
 def onMouseMove(mouseX, mouseY):
     app.mouseX = mouseX
@@ -200,14 +245,35 @@ def onKeyPress(key):
             xchange = int(distance(player.centerX, 0, x, 0))
             ychange = int(distance(0, player.centerY, 0, y))
             if player.centerX > x:
-                player.dx += xchange
+                player.dx = xchange
             if player.centerX < x:
-                player.dx -= xchange
+                player.dx = -xchange
             if player.centerY > y:
-                player.dy -= ychange/2
+                player.dy = -ychange/2
             if player.centerY < y:
-                player.dy += ychange/2
+                player.dy = ychange/2
             player.dash -= 1
+    if 'r' == key:
+        spikes.clear()
+        platforms.clear()
+        gobblers.clear()
+        secretEnding.clear()
+        background.clear()
+        createLevelOne(platforms, spikes, goal, walls, gobblers)
+        background.add(Image('images/gamebackground.png', map.left-2000, 0))
+        background.add(Image('images/gamebackground.png', background.right, 0))
+        background.add(Image('images/gamebackground.png', background.right, 0))
+        secret.centerX = -700
+        floor.left = -100
+        x = player.left
+        player.clear()
+        player.add(Image('images/rock1.png', x, 320))
+        player.dx = 0
+        player.dy = 0
+        app.started = True
+        gameOverLabel.visible = False
+
+        
         
         
 
@@ -246,9 +312,10 @@ def onStep():
         if player.hitsShape(goal):
             win()
         if player.hitsShape(secret):
-            Image(app.rickastleyurl, 0, 0, width=400, height=400)
-            Label('You found the secret ending!!!', 200, 200, fill='red', size=30)
-            app.stop()
+            secretEnding.add(Image(app.rickastleyurl, 0, 0, width=400, height=400))
+            secretEnding.add(Label('You found the secret ending!!!', 200, 200, fill='red', size=30))
+            secretEnding.toFront()
+            app.started = False
         
         if gameOverCheck() == True:
             x = player.centerX
@@ -262,7 +329,7 @@ def onStep():
                     n.centerX += randrange(-10, 10)
                     n.centerY += randrange(-10, 10)
             gameOverLabel.visible = True
-            app.stop()
+            app.started = False
 
 
 
